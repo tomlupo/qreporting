@@ -142,7 +142,7 @@ def process_report_content(
         str: HTML content generated from the notebook
     """
     # Create sanitized filename
-    filename = f"{report_name}".lower().replace(' ', '_').replace('/', '_')
+    filename = f"{report_name}".lower().replace(' ', '_').replace('/', '-')
     
     # Paths for processing
     pickle_path = os.path.join(temp_dir, f"{filename}.pkl")
@@ -323,6 +323,20 @@ def generate_report(
             depth=depth
         )
         
+        # Generate Table of Contents content
+        toc_content = generate_table_of_contents(menu_structure)
+        
+        # Process Table of Contents through notebook template just like other content
+        toc_html = process_report_content(
+            toc_content,
+            "Table of Contents",
+            temp_dir,
+            notebook_template
+        )
+        
+        # Add Table of Contents to all_content
+        all_content["Table of Contents"] = toc_html
+        
         # Create links in the menu structure to the generated HTML files
         def add_content_links(menu_dict, prefix="", current_depth=1, top_key=""):
             """Recursively add links to HTML content files in the menu structure."""
@@ -337,7 +351,7 @@ def generate_report(
                         # Get the depth for this specific key
                         key_depth = get_depth_for_key(depth, key)
                         item_path = f"{prefix}{key}" if prefix else key
-                        item_filename = item_path.lower().replace(' ', '_').replace('/', '_') + '.html'
+                        item_filename = item_path.lower().replace(' ', '_').replace('/', '-') + '.html'
                         
                         if isinstance(value, dict):
                             if current_depth < key_depth - 1:
@@ -348,7 +362,7 @@ def generate_report(
                                 linked_submenu = {}
                                 for subkey in value.keys():
                                     sub_path = f"{item_path}/{subkey}"
-                                    sub_filename = sub_path.lower().replace(' ', '_').replace('/', '_') + '.html'
+                                    sub_filename = sub_path.lower().replace(' ', '_').replace('/', '-') + '.html'
                                     linked_submenu[subkey] = sub_filename
                                 updated_menu[key] = linked_submenu
                         else:
@@ -363,7 +377,7 @@ def generate_report(
             # Process each item with the determined depth
             for key, value in menu_dict.items():
                 item_path = f"{prefix}{key}" if prefix else key
-                item_filename = item_path.lower().replace(' ', '_').replace('/', '_') + '.html'
+                item_filename = item_path.lower().replace(' ', '_').replace('/', '-') + '.html'
                 
                 if isinstance(value, dict):
                     if current_depth < max_depth - 1:
@@ -374,7 +388,7 @@ def generate_report(
                         linked_submenu = {}
                         for subkey in value.keys():
                             sub_path = f"{item_path}/{subkey}"
-                            sub_filename = sub_path.lower().replace(' ', '_').replace('/', '_') + '.html'
+                            sub_filename = sub_path.lower().replace(' ', '_').replace('/', '-') + '.html'
                             linked_submenu[subkey] = sub_filename
                         updated_menu[key] = linked_submenu
                 else:
@@ -386,17 +400,14 @@ def generate_report(
         # Add links to content files in the menu structure
         linked_menu = add_content_links(menu_structure)
         
-        # Create Reportmap content
-        reportmap_content = generate_reportmap_content(menu_structure, data_dict, depth)
-        
-        # Set reportmap as default content if no active_report is specified
+        # Set Table of Contents as default content if no active_report is specified
         if not active_report:
-            active_content = reportmap_content
+            active_content = all_content.get("Table of Contents")
         else:
             active_content = all_content.get(active_report, "")
         
-        # Create reportmap link
-        reportmap_link = "reportmap.html"
+        # Create Table of Contents link
+        table_of_contents_link = "table_of_contents.html"
         
         # Load icon mappings
         icon_mappings = {}
@@ -423,8 +434,7 @@ def generate_report(
             active_content=active_content,
             active_report=active_report or "Table of Contents",
             report_title=report_title,
-            reportmap_link=reportmap_link,
-            reportmap_content=reportmap_content,
+            table_of_contents_link=table_of_contents_link,
             default_icons=icon_mappings
         )
         
@@ -436,16 +446,11 @@ def generate_report(
         # Save all individual reports
         for report_name, content in all_content.items():
             # Create sanitized filename
-            filename = report_name.lower().replace(' ', '_').replace('/', '_')
+            filename = report_name.lower().replace(' ', '_').replace('/', '-')
             report_path = os.path.join(output_dir, f"{filename}.html")
             
             with open(report_path, 'w', encoding='utf-8') as f:
                 f.write(content)
-        
-        # Save the reportmap as a separate file
-        reportmap_path = os.path.join(output_dir, 'reportmap.html')
-        with open(reportmap_path, 'w', encoding='utf-8') as f:
-            f.write(reportmap_content)
     
     except Exception as e:
         print(f"Error generating report: {e}")
@@ -492,7 +497,7 @@ def generate_simple_report(
         )
         
         # Create sanitized filename
-        filename = report_name.lower().replace(' ', '_').replace('/', '_') + '.html'
+        filename = report_name.lower().replace(' ', '_').replace('/', '-') + '.html'
         report_path = os.path.join(output_dir, filename)
         
         # Save the HTML content to a file
@@ -513,13 +518,52 @@ def generate_simple_report(
 # HTML CONTENT GENERATION FUNCTIONS
 #------------------------------------------------------------------------------
 
-def generate_reportmap_content(
+def generate_table_of_contents(menu_structure: Dict[str, Any]) -> str:
+    """
+    Generate a simple HTML structure for the Table of Contents.
+    
+    Args:
+        menu_structure (Dict[str, Any]): The menu structure
+        
+    Returns:
+        str: Simple HTML for the Table of Contents to be processed through the notebook template
+    """
+    # Create a function to recursively build the ToC HTML
+    def build_toc_html(structure, current_path=""):
+        html = "<ul>"
+        for key, value in structure.items():
+            # Build the full path for this item
+            item_path = f"{current_path}/{key}" if current_path else key
+            link_id = item_path.lower().replace(' ', '_').replace('/', '-')
+            
+            html += f'<li><strong>{key}</strong>'
+            
+            if isinstance(value, dict) and value:
+                # For items with children
+                html += build_toc_html(value, item_path)
+            else:
+                # For leaf items
+                filename = link_id + '.html'
+                html += f' - <a href="{filename}">{key}</a>'
+            
+            html += '</li>'
+        
+        html += "</ul>"
+        return html
+
+    # Return simple HTML that will be processed through the notebook
+    #toc_html = "<h1>Table of Contents</h1>"
+    toc_html = build_toc_html(menu_structure)
+    
+    return toc_html
+
+def generate_table_of_contents_content(
     menu_structure: Dict[str, Any],
     data_dict: Dict[str, Any],
     depth: Union[int, Dict[str, int]]
 ) -> str:
     """
-    Generate HTML content for the reportmap.
+    Generate HTML content for the Table of Contents.
     
     Args:
         menu_structure (Dict[str, Any]): The menu structure
@@ -527,53 +571,7 @@ def generate_reportmap_content(
         depth (Union[int, Dict[str, int]]): The depth of the menu - either a fixed int or a dict
         
     Returns:
-        str: HTML content for the reportmap
+        str: HTML content for the Table of Contents
     """
-    # Create a function to recursively build the reportmap HTML
-    def build_reportmap_html(structure, current_path="", indent=0):
-        html = ""
-        for key, value in structure.items():
-            # Skip the Reportmap entry itself
-            if key == "Table of Contents":
-                continue
-                
-            # Build the full path for this item
-            item_path = f"{current_path}/{key}" if current_path else key
-            link_id = item_path.lower().replace(' ', '_').replace('/', '_')
-            
-            # Create the list item with appropriate link
-            item_html = '<li class="py-1">'
-            
-            # Indent based on level
-            indent_spaces = '&nbsp;' * (indent * 4)
-            
-            if isinstance(value, dict) and value:
-                # For items with children
-                item_html += f'{indent_spaces}<span class="font-semibold">{key}</span>'
-                item_html += '<ul class="pl-6 mt-1">'
-                item_html += build_reportmap_html(value, item_path, indent + 1)
-                item_html += '</ul>'
-            else:
-                # For leaf items - using onclick handler rather than data-content-url to ensure it works
-                filename = link_id + '.html'
-                item_html += f'{indent_spaces}<a href="javascript:void(0);" onclick="showContentInIframe(\'{filename}\', \'{key}\');" class="reportmap-link text-blue-600 hover:underline">{key}</a>'
-            
-            item_html += '</li>'
-            html += item_html
-        
-        return html
-
-    # Build the complete reportmap HTML
-    reportmap_html = """
-    <div class="reportmap">
-            <ul class="space-y-2">
-    """
-    
-    reportmap_html += build_reportmap_html(menu_structure)
-    
-    reportmap_html += """
-            </ul>
-    </div>
-    """
-    
-    return reportmap_html
+    # Use the new simpler function
+    return generate_table_of_contents(menu_structure)
