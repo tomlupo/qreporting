@@ -9,24 +9,89 @@
     <!-- Include Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-#report-content {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 48px); /* Adjust for header height */
-}
+        #report-content {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 48px); /* Adjust for header height */
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
 
-#content-iframe {
-    flex-grow: 1;
-    width: 100%;
-    height: 100%;
-    border: none;
-}
+        #content-iframe {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        #content-iframe.visible {
+            opacity: 1;
+        }
+        
+        .menu-item {
+            transition: background-color 0.2s ease, color 0.2s ease;
+            font-size: 1.05rem; /* Increased font size */
+        }
+        
+        .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white !important;
+            border-left: 3px solid #4f46e5;
+        }
+        
+        /* Sidebar states */
+        #sidebar {
+            transition: width 0.3s ease, transform 0.3s ease;
+        }
+        
+        #sidebar.collapsed {
+            width: 0;
+            overflow: hidden;
+        }
+        
+        main.sidebar-collapsed {
+            margin-left: 0 !important;
+        }
+        
+        /* Responsive styles */
+        @media (min-width: 1024px) {
+            main {
+                transition: margin-left 0.3s ease;
+                margin-left: 0; /* No margin by default */
+            }
+            
+            main:not(.sidebar-collapsed) {
+                margin-left: 0.5rem; /* Reduced from 16rem to create minimal spacing */
+            }
+        }
+        
+        @media (max-width: 768px) {
+            main {
+                padding: 1rem !important;
+            }
+            
+            #report-content {
+                padding: 1rem !important;
+            }
+        }
+        
+        /* Fade in animation for content */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -35,12 +100,12 @@ html, body {
         <aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen flex flex-col transition-all duration-300 ease-in-out">
             <div class="p-4 flex justify-between items-center border-b border-gray-700">
                 <h2 class="font-bold text-xl">{{ report_title|default('Report Dashboard') }}</h2>
-                <button id="sidebarCollapseBtn" class="lg:hidden">
+                <button id="sidebarCollapseBtn" class="lg:hidden" aria-label="Toggle sidebar">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
             <!-- Sidebar Menu -->
-            <nav class="flex-1 overflow-y-auto py-4">
+            <nav class="flex-1 overflow-y-auto py-4" aria-label="Main Navigation">
                 <ul class="menu-items">
                     {# Recursively render menu items #}
                     {% macro render_menu_item(key, value, level=1, icon=None) %}
@@ -48,26 +113,26 @@ html, body {
                         <li class="mb-1">
                             {% if value is mapping and value|length > 0 %}
                                 {# Menu item with submenu #}
-                                <button class="menu-item w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg" data-target="{{ item_id }}">
+                                <button class="menu-item w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg" data-target="{{ item_id }}" aria-expanded="false" aria-controls="{{ item_id }}">
                                     <div class="flex items-center">
                                         {% if level == 1 and icon %}
-                                            <i class="fas fa-{{ icon }} mr-3"></i>
+                                            <i class="fas fa-{{ icon }} mr-3" aria-hidden="true"></i>
                                         {% endif %}
                                         <span>{{ key }}</span>
                                     </div>
-                                    <i class="fas fa-chevron-right text-xs transition-transform duration-200"></i>
+                                    <i class="fas fa-chevron-right text-xs transition-transform duration-200" aria-hidden="true"></i>
                                 </button>
-                                <ul id="{{ item_id }}" class="submenu pl-{{ 10 if level == 1 else 6 }} hidden">
+                                <ul id="{{ item_id }}" class="submenu pl-{{ 10 if level == 1 else 6 }} hidden" aria-label="Submenu for {{ key }}">
                                     {% for subkey, subvalue in value.items() %}
                                         {{ render_menu_item(subkey, subvalue, level + 1) }}
                                     {% endfor %}
                                 </ul>
                             {% else %}
                                 {# Simple menu item - modified for iframe approach #}
-                                <a href="#" data-content-url="{{ value if value is string else '#' + item_id }}" class="menu-item content-link w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg">
+                                <a href="#" data-content-url="{{ value if value is string else '#' + item_id }}" class="menu-item content-link w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg" aria-label="{{ key }}">
                                     <div class="flex items-center">
                                         {% if level == 1 and icon %}
-                                            <i class="fas fa-{{ icon }} mr-3"></i>
+                                            <i class="fas fa-{{ icon }} mr-3" aria-hidden="true"></i>
                                         {% endif %}
                                         <span>{{ key }}</span>
                                     </div>
@@ -75,9 +140,6 @@ html, body {
                             {% endif %}
                         </li>
                     {% endmacro %}
-
-                    {# Map default icons to top-level menu items based on common naming #}
-                    {# Icons are now loaded from templates/report_template_icons.json #}
                     
                     {# Render standard menu items #}
                     {% for key, value in menu_structure.items() %}
@@ -89,9 +151,9 @@ html, body {
                     {# Render Table of Contents separately if it exists #}
                     {% if table_of_contents_link %}
                         <li class="mb-1">
-                            <a href="{{ table_of_contents_link }}" class="menu-item content-link w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg" data-content-url="{{ table_of_contents_link }}">
+                            <a href="#" data-content-url="{{ table_of_contents_link }}" class="menu-item content-link w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg" aria-label="Table of Contents">
                                 <div class="flex items-center">
-                                    <i class="fas fa-{{ default_icons.get('Table of Contents', 'sitemap') }} mr-3"></i>
+                                    <i class="fas fa-{{ default_icons.get('Table of Contents', 'sitemap') }} mr-3" aria-hidden="true"></i>
                                     <span>Table of Contents</span>
                                 </div>
                             </a>
@@ -104,15 +166,18 @@ html, body {
         <!-- Main Content -->
         <main class="flex-1 p-6">
             <div class="flex items-center justify-between mb-6" id="header-container">
-                <button id="mobileSidebarToggle" class="block lg:hidden bg-white p-2 rounded-md shadow">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <div class="flex items-center space-x-2">
+                    <!-- Toggle sidebar button - visible on all screen sizes -->
+                    <button id="sidebarToggle" class="bg-white p-2 rounded-md shadow hover:bg-gray-100" aria-label="Toggle sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Report Content Container -->
             <div id="report-content" class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full">
                 <!-- Initial content shown before iframe loads -->
-                <div id="initial-content">
+                <div id="initial-content" class="fade-in">
                     {% if active_content %}
                         {{ active_content|safe }}
                     {% else %}
@@ -137,188 +202,218 @@ html, body {
     </div>
 
     <script>
-        // Global function to show content in the iframe - available for onclick handlers
-        function showContentInIframe(contentUrl, linkText) {
-            const contentTitle = document.getElementById('content-title');
-            const headerContainer = document.getElementById('header-container');
-            const loadingIndicator = document.getElementById('loading-indicator');
-            const contentIframe = document.getElementById('content-iframe');
-            const initialContent = document.getElementById('initial-content');
-            
+        // Document elements
+        let contentLinks;
+        let contentIframe;
+        let initialContent;
+        let headerContainer;
+        let loadingIndicator;
+        let sidebar;
+        let activeMenuItem = null;
+        let mainContent;
+        
+        // Main function to load content in iframe
+        function showContentInIframe(contentUrl, linkText, clickedMenuItem = null) {
             if (!contentUrl) return;
             
             // Show loading indicator
             loadingIndicator.classList.remove('hidden');
             
-            // Hide the header title since the content has its own title
-            headerContainer.classList.add('hidden');
-            
-            // Show iframe, hide initial content
+            // Show iframe, hide initial content but keep header visible
             initialContent.classList.add('hidden');
             contentIframe.classList.remove('hidden');
+            
+            // Reset the iframe opacity for transition
+            contentIframe.classList.remove('visible');
             
             // Set iframe source
             contentIframe.src = contentUrl;
             
-            // Add this page to browser history
-            const state = { contentUrl: contentUrl, title: linkText, hideTitle: true };
-            history.pushState(state, linkText, '#' + contentUrl);
-        }
-    
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get DOM elements
-            const contentLinks = document.querySelectorAll('.content-link');
-            const contentTitle = document.getElementById('content-title');
-            const headerContainer = document.getElementById('header-container');
-            const loadingIndicator = document.getElementById('loading-indicator');
-            const contentIframe = document.getElementById('content-iframe');
-            const initialContent = document.getElementById('initial-content');
-            
-            // Function to load content in iframe
-            function loadContentInIframe(contentUrl, linkText) {
-                if (!contentUrl) return;
-                
-                // Show loading indicator
-                loadingIndicator.classList.remove('hidden');
-                
-                // Hide the header title since the content has its own title
-                headerContainer.classList.add('hidden');
-                
-                // Show iframe, hide initial content
-                initialContent.classList.add('hidden');
-                contentIframe.classList.remove('hidden');
-                
-                // Set iframe source
-                contentIframe.src = contentUrl;
-                
-                // Add this page to browser history
-                const state = { contentUrl: contentUrl, title: linkText, hideTitle: true };
-                history.pushState(state, linkText, '#' + contentUrl);
+            // Update active menu item
+            if (clickedMenuItem && activeMenuItem !== clickedMenuItem) {
+                if (activeMenuItem) {
+                    activeMenuItem.classList.remove('active');
+                }
+                clickedMenuItem.classList.add('active');
+                activeMenuItem = clickedMenuItem;
             }
             
-            // Toggle submenu visibility when clicking on menu items with submenus
-            const menuItems = document.querySelectorAll('.menu-item');
-            menuItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    // Check if this menu item has a submenu
-                    const submenu = this.nextElementSibling;
-                    if (submenu && submenu.classList.contains('submenu')) {
-                        // Toggle the submenu visibility
-                        submenu.classList.toggle('hidden');
-                        
-                        // Rotate the chevron icon when toggling
-                        const chevron = this.querySelector('.fa-chevron-right');
-                        if (chevron) {
-                            chevron.classList.toggle('rotate-90');
+            // Add to browser history
+            const state = { contentUrl, title: linkText, hideTitle: true };
+            history.pushState(state, linkText, '#' + contentUrl);
+            
+            // On mobile, auto-close the sidebar when a link is clicked
+            if (window.innerWidth < 1024) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+        
+        // Toggle sidebar visibility
+        function toggleSidebar() {
+            // For larger screens, use width-based collapse
+            if (window.innerWidth >= 1024) {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('sidebar-collapsed');
+                
+                // Store preference in localStorage
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            } else {
+                // For mobile/tablet, use transform-based slide
+                sidebar.classList.toggle('-translate-x-full');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get DOM elements
+            contentLinks = document.querySelectorAll('.content-link');
+            contentIframe = document.getElementById('content-iframe');
+            initialContent = document.getElementById('initial-content');
+            headerContainer = document.getElementById('header-container');
+            loadingIndicator = document.getElementById('loading-indicator');
+            sidebar = document.getElementById('sidebar');
+            mainContent = document.querySelector('main');
+            
+            // Handle submenu toggles
+            document.querySelectorAll('.menu-item').forEach(item => {
+                if (item.hasAttribute('data-target')) {
+                    item.addEventListener('click', function(e) {
+                        const submenu = this.nextElementSibling;
+                        if (submenu && submenu.classList.contains('submenu')) {
+                            // Toggle submenu visibility
+                            const isExpanded = submenu.classList.toggle('hidden');
+                            this.setAttribute('aria-expanded', !isExpanded);
+                            
+                            // Rotate chevron
+                            const chevron = this.querySelector('.fa-chevron-right');
+                            if (chevron) {
+                                chevron.classList.toggle('rotate-90');
+                            }
+                            
+                            e.preventDefault();
+                            e.stopPropagation();
                         }
-                        
-                        // Prevent default and stop propagation for items with submenus
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                });
+                    });
+                }
             });
             
-            // Handle content links - load content in iframe
+            // Handle content links
             contentLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
-                    // Get the content URL from data attribute
                     const contentUrl = this.getAttribute('data-content-url');
-                    
-                    // Get the link text to update the title
                     const linkText = this.querySelector('span').textContent;
-                    
-                    loadContentInIframe(contentUrl, linkText);
+                    showContentInIframe(contentUrl, linkText, this);
                 });
             });
             
-            // Handle iframe load/error events
+            // Handle iframe events
             contentIframe.onload = function() {
-                // Hide loading indicator when iframe loaded
                 loadingIndicator.classList.add('hidden');
+                // Add visible class after a short delay for smooth transition
+                setTimeout(() => {
+                    contentIframe.classList.add('visible');
+                }, 50);
             };
             
             contentIframe.onerror = function() {
                 loadingIndicator.classList.add('hidden');
                 initialContent.classList.remove('hidden');
-                initialContent.innerHTML = '<div class="text-red-500 p-4">Error loading content</div>';
                 contentIframe.classList.add('hidden');
+                initialContent.innerHTML = '<div class="fade-in text-red-500 p-4 text-center"><i class="fas fa-exclamation-triangle mr-2"></i>Error loading content</div>';
             };
             
-            // Handle browser back/forward buttons
+            // Handle browser back/forward
             window.addEventListener('popstate', function(event) {
                 if (event.state && event.state.contentUrl) {
-                    // Show loading indicator
-                    loadingIndicator.classList.remove('hidden');
+                    // Find the corresponding menu item
+                    let menuItem = null;
+                    contentLinks.forEach(link => {
+                        if (link.getAttribute('data-content-url') === event.state.contentUrl) {
+                            menuItem = link;
+                        }
+                    });
                     
-                    // Check if we need to hide or show the header
-                    if (event.state.hideTitle) {
-                        headerContainer.classList.add('hidden');
-                    } else {
-                        headerContainer.classList.remove('hidden');
-                        contentTitle.textContent = event.state.title;
-                    }
-                    
-                    // Show iframe, hide initial content
-                    initialContent.classList.add('hidden');
-                    contentIframe.classList.remove('hidden');
-                    
-                    // Set iframe source
-                    contentIframe.src = event.state.contentUrl;
+                    // Load the content from history state
+                    showContentInIframe(event.state.contentUrl, event.state.title, menuItem);
                 } else {
-                    // Show the header for the initial/default view
+                    // Show the default view
+                    if (activeMenuItem) {
+                        activeMenuItem.classList.remove('active');
+                        activeMenuItem = null;
+                    }
                     headerContainer.classList.remove('hidden');
+                    contentIframe.classList.add('hidden');
+                    contentIframe.classList.remove('visible');
+                    initialContent.classList.remove('hidden');
                 }
             });
             
-            // Adjust iframe height based on content
-            function adjustIframeHeight() {
-                // This function tries to set the iframe height based on its content
-                // Only works for same-origin content
-                try {
-                    if (contentIframe.contentWindow.document.body) {
-                        const height = contentIframe.contentWindow.document.body.scrollHeight;
-                        contentIframe.style.height = (height + 20) + 'px'; // Add padding
-                    }
-                } catch (e) {
-                    console.log('Cannot adjust iframe height due to same-origin policy');
-                }
-            }
-            
-            // Try to adjust height when iframe loads
-            contentIframe.addEventListener('load', adjustIframeHeight);
-            
-            // Mobile sidebar toggle
-            const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
-            const sidebar = document.getElementById('sidebar');
+            // Setup sidebar toggle
+            const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
             
-            mobileSidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('-translate-x-full');
-            });
+            // Main sidebar toggle button (always visible)
+            sidebarToggle.addEventListener('click', toggleSidebar);
             
-            sidebarCollapseBtn.addEventListener('click', function() {
-                sidebar.classList.toggle('-translate-x-full');
-            });
+            // Inner sidebar toggle (visible only on mobile)
+            if (sidebarCollapseBtn) {
+                sidebarCollapseBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('-translate-x-full');
+                });
+            }
             
-            // Handle sidebar mobile responsiveness
+            // Responsive sidebar handling
             function handleResize() {
                 if (window.innerWidth < 1024) { // lg breakpoint
                     sidebar.classList.add('fixed', 'z-20');
-                    // Check if sidebar is already hidden on mobile
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('sidebar-collapsed');
+                    
+                    // On initial mobile view, hide sidebar
                     if (!sidebar.classList.contains('-translate-x-full')) {
                         sidebar.classList.add('-translate-x-full');
                     }
                 } else {
                     sidebar.classList.remove('fixed', 'z-20', '-translate-x-full');
+                    
+                    // Check saved preference for larger screens
+                    const savedPreference = localStorage.getItem('sidebarCollapsed');
+                    if (savedPreference === 'true') {
+                        sidebar.classList.add('collapsed');
+                        mainContent.classList.add('sidebar-collapsed');
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        mainContent.classList.remove('sidebar-collapsed');
+                    }
                 }
             }
             
-            // Initial call and event listener for window resize
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth < 1024 && 
+                    !sidebar.contains(e.target) && 
+                    e.target !== sidebarToggle &&
+                    !sidebar.classList.contains('-translate-x-full')) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            });
+            
+            // Initialize responsive behavior
             handleResize();
             window.addEventListener('resize', handleResize);
+            
+            // Set initial active item if any
+            if (location.hash && location.hash.length > 1) {
+                const contentUrl = location.hash.substring(1);
+                for (const link of contentLinks) {
+                    if (link.getAttribute('data-content-url') === contentUrl) {
+                        link.classList.add('active');
+                        activeMenuItem = link;
+                        break;
+                    }
+                }
+            }
         });
     </script>
 </body>

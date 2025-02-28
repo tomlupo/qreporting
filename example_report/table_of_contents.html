@@ -7475,11 +7475,11 @@ a.anchor-link {
 </style>
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
-<main><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput celltag_parameters" id="cell-id=0251fc56">
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput celltag_injected-parameters" id="cell-id=44b392ac">
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput" id="cell-id=01a306e8">
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput" id="cell-id=1cc3b58e">
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=0690c40d">
+<main><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput celltag_parameters" id="cell-id=36e8e555">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput celltag_injected-parameters" id="cell-id=eb6a3733">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput" id="cell-id=46d8745d">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput" id="cell-id=1d1a26f5">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=43a8d7f6">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
@@ -7496,19 +7496,57 @@ a.anchor-link {
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=b5527f29">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=8a69a7dd">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output" data-mime-type="text/markdown" tabindex="0">
-<h1>Table of Contents</h1><ul><li><strong>Dashboard</strong><ul><li><strong>Monthly Trend</strong> - <a href="dashboard-monthly_trend.html">Monthly Trend</a></li></ul></li><li><strong>Products</strong><ul><li><strong>Overview</strong> - <a href="products-overview.html">Overview</a></li><li><strong>Categories</strong> - <a href="products-categories.html">Categories</a></li></ul></li><li><strong>Settings</strong> - <a href="settings.html">Settings</a></li></ul>
+<ul><li><strong>Dashboard</strong><ul><li><strong>Monthly Trend</strong> - <a class="toc-link" data-title="Monthly Trend" data-url="dashboard-monthly_trend.html" href="#" onclick="return handleTocLinkClick('dashboard-monthly_trend.html', 'Monthly Trend')">Monthly Trend</a></li></ul></li><li><strong>Products</strong><ul><li><strong>Overview</strong> - <a class="toc-link" data-title="Overview" data-url="products-overview.html" href="#" onclick="return handleTocLinkClick('products-overview.html', 'Overview')">Overview</a></li><li><strong>Categories</strong> - <a class="toc-link" data-title="Categories" data-url="products-categories.html" href="#" onclick="return handleTocLinkClick('products-categories.html', 'Categories')">Categories</a></li></ul></li><li><strong>Settings</strong> - <a class="toc-link" data-title="Settings" data-url="settings.html" href="#" onclick="return handleTocLinkClick('settings.html', 'Settings')">Settings</a></li></ul>
 </div>
 </div>
 </div>
 </div>
 </div>
 </main>
+
+            <script>
+            // Global function to handle TOC link clicks
+            window.handleTocLinkClick = function(url, title) {
+                try {
+                    // First, check if we are in an iframe
+                    if (window !== window.parent) {
+                        // Try to use parent's showContentInIframe function
+                        window.parent.showContentInIframe(url, title, null);
+                    } else if (typeof window.showContentInIframe === 'function') {
+                        // We're in the main window directly
+                        window.showContentInIframe(url, title, null);
+                    } else {
+                        // Fallback to direct navigation
+                        window.location.href = url;
+                    }
+                } catch (e) {
+                    console.error("Error handling TOC link:", e);
+                    // Fallback to direct navigation on error
+                    window.location.href = url;
+                }
+                
+                return false; // Prevent default anchor behavior
+            };
+            
+            // Apply to all TOC links after DOM is loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.toc-link').forEach(function(link) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var url = this.getAttribute('data-url');
+                        var title = this.getAttribute('data-title');
+                        handleTocLinkClick(url, title);
+                    });
+                });
+            });
+            </script>
+            
 </body>
 </html>

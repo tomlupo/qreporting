@@ -180,6 +180,51 @@ def process_report_content(
         # Read the HTML content
         with open(html_path, 'r', encoding='utf-8') as f:
             html_content = f.read()
+        
+        # For Table of Contents, inject the JavaScript function
+        if report_name == "Table of Contents":
+            # Simplified and direct approach with globally accessible function
+            js_handler = """
+            <script>
+            // Global function to handle TOC link clicks
+            window.handleTocLinkClick = function(url, title) {
+                try {
+                    // First, check if we are in an iframe
+                    if (window !== window.parent) {
+                        // Try to use parent's showContentInIframe function
+                        window.parent.showContentInIframe(url, title, null);
+                    } else if (typeof window.showContentInIframe === 'function') {
+                        // We're in the main window directly
+                        window.showContentInIframe(url, title, null);
+                    } else {
+                        // Fallback to direct navigation
+                        window.location.href = url;
+                    }
+                } catch (e) {
+                    console.error("Error handling TOC link:", e);
+                    // Fallback to direct navigation on error
+                    window.location.href = url;
+                }
+                
+                return false; // Prevent default anchor behavior
+            };
+            
+            // Apply to all TOC links after DOM is loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.toc-link').forEach(function(link) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var url = this.getAttribute('data-url');
+                        var title = this.getAttribute('data-title');
+                        handleTocLinkClick(url, title);
+                    });
+                });
+            });
+            </script>
+            """
+            
+            # Insert the script just before the closing </body> tag
+            html_content = html_content.replace('</body>', f'{js_handler}\n</body>')
             
         return html_content
     
@@ -544,15 +589,15 @@ def generate_table_of_contents(menu_structure: Dict[str, Any]) -> str:
             else:
                 # For leaf items
                 filename = link_id + '.html'
-                html += f' - <a href="{filename}">{key}</a>'
+                # Direct onclick handler using global function for maximum compatibility
+                html += f' - <a href="#" class="toc-link" onclick="return handleTocLinkClick(\'{filename}\', \'{key}\')" data-url="{filename}" data-title="{key}">{key}</a>'
             
             html += '</li>'
         
         html += "</ul>"
         return html
 
-    # Return simple HTML that will be processed through the notebook
-    #toc_html = "<h1>Table of Contents</h1>"
+    # Return the TOC HTML without the script (will be added after notebook processing)
     toc_html = build_toc_html(menu_structure)
     
     return toc_html
