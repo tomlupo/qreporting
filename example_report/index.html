@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Performance</title>
+    <!-- Include Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Remove iframe border and ensure it fills container */
+        #content-iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            min-height: 600px; /* Minimum height */
+        }
+        
+        /* Hide scrollbar on iframe */
+        #content-iframe {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen flex flex-col transition-all duration-300 ease-in-out">
+            <div class="p-4 flex justify-between items-center border-b border-gray-700">
+                <h2 class="font-bold text-xl">Sales Performance</h2>
+                <button id="sidebarCollapseBtn" class="lg:hidden">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <!-- Sidebar Menu -->
+            <nav class="flex-1 overflow-y-auto py-4">
+                <ul class="menu-items">
+                    
+                    
+
+                    
+                    
+                    
+                    
+                    
+                        
+                            
+                        
+                        <li class="mb-1">
+                            
+                                
+                                <button class="menu-item w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg" data-target="dashboard">
+                                    <div class="flex items-center">
+                                        
+                                            <i class="fas fa-home mr-3"></i>
+                                        
+                                        <span>Dashboard</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-xs transition-transform duration-200"></i>
+                                </button>
+                                <ul id="dashboard" class="submenu pl-10 hidden">
+                                    
+                                        
+                        
+                        <li class="mb-1">
+                            
+                                
+                                <a href="#" data-content-url="dashboard_monthly_trend.html" class="menu-item content-link w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg">
+                                    <div class="flex items-center">
+                                        
+                                        <span>Monthly Trend</span>
+                                    </div>
+                                </a>
+                            
+                        </li>
+                    
+                                    
+                                </ul>
+                            
+                        </li>
+                    
+                        
+                    
+                        
+                            
+                        
+                        <li class="mb-1">
+                            
+                                
+                                <button class="menu-item w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg" data-target="products">
+                                    <div class="flex items-center">
+                                        
+                                            <i class="fas fa-box mr-3"></i>
+                                        
+                                        <span>Products</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-xs transition-transform duration-200"></i>
+                                </button>
+                                <ul id="products" class="submenu pl-10 hidden">
+                                    
+                                        
+                        
+                        <li class="mb-1">
+                            
+                                
+                                <a href="#" data-content-url="products_overview.html" class="menu-item content-link w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg">
+                                    <div class="flex items-center">
+                                        
+                                        <span>Overview</span>
+                                    </div>
+                                </a>
+                            
+                        </li>
+                    
+                                    
+                                        
+                        
+                        <li class="mb-1">
+                            
+                                
+                                <a href="#" data-content-url="products_categories.html" class="menu-item content-link w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg">
+                                    <div class="flex items-center">
+                                        
+                                        <span>Categories</span>
+                                    </div>
+                                </a>
+                            
+                        </li>
+                    
+                                    
+                                </ul>
+                            
+                        </li>
+                    
+                        
+                    
+                        
+                            
+                        
+                        <li class="mb-1">
+                            
+                                
+                                <a href="#" data-content-url="settings.html" class="menu-item content-link w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg">
+                                    <div class="flex items-center">
+                                        
+                                            <i class="fas fa-cog mr-3"></i>
+                                        
+                                        <span>Settings</span>
+                                    </div>
+                                </a>
+                            
+                        </li>
+                    
+                        
+                    
+                    
+                    
+                    
+                        <li class="mb-1">
+                            <a href="index.html" class="menu-item w-full flex items-center justify-between px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="fas fa-sitemap mr-3"></i>
+                                    <span>Table of Contents</span>
+                                </div>
+                            </a>
+                        </li>
+                    
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="flex items-center justify-between mb-6" id="header-container">
+                <button id="mobileSidebarToggle" class="block lg:hidden bg-white p-2 rounded-md shadow">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="content-title" class="text-2xl font-semibold text-gray-800">Table of Contents</h1>
+            </div>
+
+            <!-- Report Content Container -->
+            <div id="report-content" class="bg-white rounded-lg shadow-md p-6">
+                <!-- Initial content shown before iframe loads -->
+                <div id="initial-content">
+                    
+                        
+    <div class="reportmap">
+            <ul class="space-y-2">
+    <li class="py-1"><span class="font-semibold">Dashboard</span><ul class="pl-6 mt-1"><li class="py-1">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0);" onclick="showContentInIframe('dashboard_monthly_trend.html', 'Monthly Trend');" class="reportmap-link text-blue-600 hover:underline">Monthly Trend</a></li></ul></li><li class="py-1"><span class="font-semibold">Products</span><ul class="pl-6 mt-1"><li class="py-1">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0);" onclick="showContentInIframe('products_overview.html', 'Overview');" class="reportmap-link text-blue-600 hover:underline">Overview</a></li><li class="py-1">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0);" onclick="showContentInIframe('products_categories.html', 'Categories');" class="reportmap-link text-blue-600 hover:underline">Categories</a></li></ul></li><li class="py-1"><a href="javascript:void(0);" onclick="showContentInIframe('settings.html', 'Settings');" class="reportmap-link text-blue-600 hover:underline">Settings</a></li>
+            </ul>
+    </div>
+    
+                    
+                </div>
+                
+                <!-- Content iframe - initially hidden -->
+                <iframe id="content-iframe" class="hidden" title="Report Content"></iframe>
+            </div>
+            
+            <!-- Loading indicator -->
+            <div id="loading-indicator" class="hidden fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                <div class="bg-white p-4 rounded-lg shadow-lg flex items-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mr-3"></div>
+                    <span>Loading content...</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Global function to show content in the iframe - available for onclick handlers
+        function showContentInIframe(contentUrl, linkText) {
+            const contentTitle = document.getElementById('content-title');
+            const headerContainer = document.getElementById('header-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const contentIframe = document.getElementById('content-iframe');
+            const initialContent = document.getElementById('initial-content');
+            
+            if (!contentUrl) return;
+            
+            // Show loading indicator
+            loadingIndicator.classList.remove('hidden');
+            
+            // Hide the header title since the content has its own title
+            headerContainer.classList.add('hidden');
+            
+            // Show iframe, hide initial content
+            initialContent.classList.add('hidden');
+            contentIframe.classList.remove('hidden');
+            
+            // Set iframe source
+            contentIframe.src = contentUrl;
+            
+            // Add this page to browser history
+            const state = { contentUrl: contentUrl, title: linkText, hideTitle: true };
+            history.pushState(state, linkText, '#' + contentUrl);
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get DOM elements
+            const contentLinks = document.querySelectorAll('.content-link');
+            const contentTitle = document.getElementById('content-title');
+            const headerContainer = document.getElementById('header-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const contentIframe = document.getElementById('content-iframe');
+            const initialContent = document.getElementById('initial-content');
+            
+            // Function to load content in iframe
+            function loadContentInIframe(contentUrl, linkText) {
+                if (!contentUrl) return;
+                
+                // Show loading indicator
+                loadingIndicator.classList.remove('hidden');
+                
+                // Hide the header title since the content has its own title
+                headerContainer.classList.add('hidden');
+                
+                // Show iframe, hide initial content
+                initialContent.classList.add('hidden');
+                contentIframe.classList.remove('hidden');
+                
+                // Set iframe source
+                contentIframe.src = contentUrl;
+                
+                // Add this page to browser history
+                const state = { contentUrl: contentUrl, title: linkText, hideTitle: true };
+                history.pushState(state, linkText, '#' + contentUrl);
+            }
+            
+            // Toggle submenu visibility when clicking on menu items with submenus
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // Check if this menu item has a submenu
+                    const submenu = this.nextElementSibling;
+                    if (submenu && submenu.classList.contains('submenu')) {
+                        // Toggle the submenu visibility
+                        submenu.classList.toggle('hidden');
+                        
+                        // Rotate the chevron icon when toggling
+                        const chevron = this.querySelector('.fa-chevron-right');
+                        if (chevron) {
+                            chevron.classList.toggle('rotate-90');
+                        }
+                        
+                        // Prevent default and stop propagation for items with submenus
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            });
+            
+            // Handle content links - load content in iframe
+            contentLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Get the content URL from data attribute
+                    const contentUrl = this.getAttribute('data-content-url');
+                    
+                    // Get the link text to update the title
+                    const linkText = this.querySelector('span').textContent;
+                    
+                    loadContentInIframe(contentUrl, linkText);
+                });
+            });
+            
+            // Handle iframe load/error events
+            contentIframe.onload = function() {
+                // Hide loading indicator when iframe loaded
+                loadingIndicator.classList.add('hidden');
+            };
+            
+            contentIframe.onerror = function() {
+                loadingIndicator.classList.add('hidden');
+                initialContent.classList.remove('hidden');
+                initialContent.innerHTML = '<div class="text-red-500 p-4">Error loading content</div>';
+                contentIframe.classList.add('hidden');
+            };
+            
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function(event) {
+                if (event.state && event.state.contentUrl) {
+                    // Show loading indicator
+                    loadingIndicator.classList.remove('hidden');
+                    
+                    // Check if we need to hide or show the header
+                    if (event.state.hideTitle) {
+                        headerContainer.classList.add('hidden');
+                    } else {
+                        headerContainer.classList.remove('hidden');
+                        contentTitle.textContent = event.state.title;
+                    }
+                    
+                    // Show iframe, hide initial content
+                    initialContent.classList.add('hidden');
+                    contentIframe.classList.remove('hidden');
+                    
+                    // Set iframe source
+                    contentIframe.src = event.state.contentUrl;
+                } else {
+                    // Show the header for the initial/default view
+                    headerContainer.classList.remove('hidden');
+                }
+            });
+            
+            // Adjust iframe height based on content
+            function adjustIframeHeight() {
+                // This function tries to set the iframe height based on its content
+                // Only works for same-origin content
+                try {
+                    if (contentIframe.contentWindow.document.body) {
+                        const height = contentIframe.contentWindow.document.body.scrollHeight;
+                        contentIframe.style.height = (height + 20) + 'px'; // Add padding
+                    }
+                } catch (e) {
+                    console.log('Cannot adjust iframe height due to same-origin policy');
+                }
+            }
+            
+            // Try to adjust height when iframe loads
+            contentIframe.addEventListener('load', adjustIframeHeight);
+            
+            // Mobile sidebar toggle
+            const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+            
+            mobileSidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+            
+            sidebarCollapseBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+            
+            // Handle sidebar mobile responsiveness
+            function handleResize() {
+                if (window.innerWidth < 1024) { // lg breakpoint
+                    sidebar.classList.add('fixed', 'z-20');
+                    // Check if sidebar is already hidden on mobile
+                    if (!sidebar.classList.contains('-translate-x-full')) {
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                } else {
+                    sidebar.classList.remove('fixed', 'z-20', '-translate-x-full');
+                }
+            }
+            
+            // Initial call and event listener for window resize
+            handleResize();
+            window.addEventListener('resize', handleResize);
+        });
+    </script>
+</body>
+</html> 

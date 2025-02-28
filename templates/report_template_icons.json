@@ -1,0 +1,17 @@
+{
+    "_metadata": {
+        "source": "Font Awesome",
+        "version": "6.4.0",
+        "prefix": "fa-",
+        "style": "fas",
+        "description": "Icons use Font Awesome 6.4.0 solid style. Icon names should be used without the 'fa-' prefix. For available icons, visit: https://fontawesome.com/v6/search?m=free&s=solid"
+    },
+    "Dashboard": "home",
+    "Reports": "chart-bar",
+    "Customers": "users",
+    "Products": "box",
+    "Analytics": "chart-line",
+    "Settings": "cog",
+    "Help": "question-circle",
+    "Table of Contents": "sitemap"
+} 
